@@ -67,8 +67,8 @@
     <div id="container">
         <h2>Update Local and Cloudflare Worker Text</h2>
         <form id="commandForm">
-            <textarea id="newText" placeholder="Enter your text here..."></textarea>
-            <button type="submit">Save Text</button>
+            <textarea id="encodedText" placeholder="Enter base64 encoded text here..."></textarea>
+            <button type="submit">Send to Discord</button>
         </form>
         <div id="response" class="response"></div>
     </div>
@@ -79,39 +79,30 @@
 
             commandForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const newText = document.getElementById('newText').value;
+                const encodedText = document.getElementById('encodedText').value;
+                const decodedText = atob(encodedText); // Decode base64 text
 
-                // Save text locally
-                localStorage.setItem('savedText', newText);
-                responseDiv.innerText = 'Text saved locally and updating Cloudflare Worker...';
-
-                // Update text in Cloudflare Worker
-                const result = await updateWorkerText(newText);
+                // Send decoded text to Discord webhook
+                const result = await sendToDiscord(decodedText);
 
                 // Show the result
                 if (result.ok) {
-                    responseDiv.innerText = 'Text saved locally and updated on Cloudflare Worker!';
+                    responseDiv.innerText = 'Text sent to Discord successfully!';
                 } else {
-                    responseDiv.innerText = `Failed to update Cloudflare Worker: ${result.statusText}`;
+                    responseDiv.innerText = `Failed to send text to Discord: ${result.statusText}`;
                 }
             });
-
-            // Load saved text from local storage
-            const savedText = localStorage.getItem('savedText');
-            if (savedText) {
-                document.getElementById('newText').value = savedText;
-            }
         });
 
-        async function updateWorkerText(newText) {
-            const workerUrl = 'https://worker-patient-wave-96d1.pakistan-gov-pk.workers.dev'; // Replace with your Cloudflare Worker URL
+        async function sendToDiscord(text) {
+            const discordWebhookUrl = 'https://discord.com/api/webhooks/1244950910954770472/02IusXlbZ4UHJlqqJrXL5a7JjFL_vxMrQnof_c5ZoL1Xz_NM0YXg_hSBb4RN7yeg-ANd';
 
-            const response = await fetch(workerUrl, {
+            const response = await fetch(discordWebhookUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: new URLSearchParams({ newText: newText })
+                body: JSON.stringify({ content: text })
             });
 
             return response;
