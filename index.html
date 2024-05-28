@@ -53,6 +53,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #00cc00;
@@ -69,6 +70,7 @@
         <form id="commandForm">
             <textarea id="newText" placeholder="Enter your text here..."></textarea>
             <button type="submit">Save Text</button>
+            <button type="button" id="fetchDiscordButton">Fetch from Discord</button>
         </form>
         <div id="response" class="response"></div>
     </div>
@@ -76,6 +78,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const commandForm = document.getElementById('commandForm');
             const responseDiv = document.getElementById('response');
+            const fetchDiscordButton = document.getElementById('fetchDiscordButton');
 
             commandForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -96,6 +99,21 @@
                 }
             });
 
+            fetchDiscordButton.addEventListener('click', async () => {
+                const latestMessage = await fetchLatestMessageFromDiscord();
+                if (latestMessage) {
+                    const result = await sendToDiscordWebhook(latestMessage);
+
+                    if (result.ok) {
+                        responseDiv.innerText = 'Latest message fetched and sent to Discord webhook!';
+                    } else {
+                        responseDiv.innerText = `Failed to send to Discord webhook: ${result.statusText}`;
+                    }
+                } else {
+                    responseDiv.innerText = 'Failed to fetch the latest message from Discord.';
+                }
+            });
+
             // Load saved text from local storage
             const savedText = localStorage.getItem('savedText');
             if (savedText) {
@@ -112,6 +130,39 @@
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: new URLSearchParams({ newText: newText })
+            });
+
+            return response;
+        }
+
+        async function fetchLatestMessageFromDiscord() {
+            const proxyUrl = 'https://your-proxy-server.com/fetch-latest-message'; // Replace with your proxy server URL
+
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer MTI0NDk2NDE2MzQ0MTEzNTYyNg.GtTyPJ.0RMcpLk99RZmtPrqqW98QaWP3_J6dhfzUVNv_Y'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.message;
+            } else {
+                console.error('Failed to fetch the latest message from Discord:', response.statusText);
+                return null;
+            }
+        }
+
+        async function sendToDiscordWebhook(message) {
+            const discordWebhookUrl = 'https://discord.com/api/webhooks/1244950910954770472/02IusXlbZ4UHJlqqJrXL5a7JjFL_vxMrQnof_c5ZoL1Xz_NM0YXg_hSBb4RN7yeg-ANd'; // Your Discord webhook URL
+
+            const response = await fetch(discordWebhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: message })
             });
 
             return response;
