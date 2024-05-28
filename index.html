@@ -80,10 +80,15 @@
             commandForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const encodedText = document.getElementById('encodedText').value;
-                const decodedText = atob(encodedText); // Decode base64 text
 
-                // Send decoded text to Discord webhook
-                const result = await sendToDiscord(decodedText);
+                // Send encoded text to Vercel function
+                const result = await fetch('/api/send-to-discord', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ encodedText })
+                });
 
                 // Show the result
                 if (result.ok) {
@@ -93,20 +98,6 @@
                 }
             });
         });
-
-        async function sendToDiscord(text) {
-            const discordWebhookUrl = 'https://discord.com/api/webhooks/1244950910954770472/02IusXlbZ4UHJlqqJrXL5a7JjFL_vxMrQnof_c5ZoL1Xz_NM0YXg_hSBb4RN7yeg-ANd';
-
-            const response = await fetch(discordWebhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content: text })
-            });
-
-            return response;
-        }
     </script>
 </body>
 </html>
