@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Local and Cloudflare Worker Text</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            background-color: #000000;
+            color: #00ff00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #00ff00;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-size: 20px;
+            color: #00ff00;
+            background-color: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            resize: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            color: #000000;
+            background-color: #00ff00;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #00cc00;
+        }
+        .response {
+            margin-top: 20px;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>Update Local and Cloudflare Worker Text</h2>
+        <form id="commandForm">
+            <textarea id="newText" placeholder="Enter your text here..."></textarea>
+            <button type="submit">Save Text</button>
+        </form>
+        <div id="response" class="response"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const commandForm = document.getElementById('commandForm');
+            const responseDiv = document.getElementById('response');
+
+            commandForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newText = document.getElementById('newText').value;
+
+                // Save text locally
+                localStorage.setItem('savedText', newText);
+                responseDiv.innerText = 'Text saved locally and updating Cloudflare Worker...';
+
+                // Update text in Cloudflare Worker
+                const result = await updateWorkerText(newText);
+
+                // Show the result
+                if (result.ok) {
+                    responseDiv.innerText = 'Text saved locally and updated on Cloudflare Worker!';
+                } else {
+                    responseDiv.innerText = `Failed to update Cloudflare Worker: ${result.statusText}`;
+                }
+            });
+
+            // Load saved text from local storage
+            const savedText = localStorage.getItem('savedText');
+            if (savedText) {
+                document.getElementById('newText').value = savedText;
+            }
+        });
+
+        async function updateWorkerText(newText) {
+            const workerUrl = 'https://worker-patient-wave-96d1.pakistan-gov-pk.workers.dev'; // Replace with your Cloudflare Worker URL
+
+            const response = await fetch(workerUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ newText: newText })
+            });
+
+            return response;
+        }
+    </script>
+</body>
+</html>
