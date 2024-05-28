@@ -67,8 +67,8 @@
     <div id="container">
         <h2>Update Local and Cloudflare Worker Text</h2>
         <form id="commandForm">
-            <textarea id="encodedText" placeholder="Enter base64 encoded text here..."></textarea>
-            <button type="submit">Send to Discord</button>
+            <textarea id="newText" placeholder="Enter your text here..."></textarea>
+            <button type="submit">Save Text</button>
         </form>
         <div id="response" class="response"></div>
     </div>
@@ -79,25 +79,43 @@
 
             commandForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const encodedText = document.getElementById('encodedText').value;
+                const newText = document.getElementById('newText').value;
 
-                // Send encoded text to Vercel function
-                const result = await fetch('/api/send-to-discord', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ encodedText })
-                });
+                // Save text locally
+                localStorage.setItem('savedText', newText);
+                responseDiv.innerText = 'Text saved locally and updating Cloudflare Worker...';
+
+                // Update text in Cloudflare Worker
+                const result = await updateWorkerText(newText);
 
                 // Show the result
                 if (result.ok) {
-                    responseDiv.innerText = 'Text sent to Discord successfully!';
+                    responseDiv.innerText = 'Text saved locally and updated on Cloudflare Worker!';
                 } else {
-                    responseDiv.innerText = `Failed to send text to Discord: ${result.statusText}`;
+                    responseDiv.innerText = `Failed to update Cloudflare Worker: ${result.statusText}`;
                 }
             });
+
+            // Load saved text from local storage
+            const savedText = localStorage.getItem('savedText');
+            if (savedText) {
+                document.getElementById('newText').value = savedText;
+            }
         });
+
+        async function updateWorkerText(newText) {
+            const workerUrl = 'https://worker-patient-wave-96d1.pakistan-gov-pk.workers.dev'; // Replace with your Cloudflare Worker URL
+
+            const response = await fetch(workerUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ newText: newText })
+            });
+
+            return response;
+        }
     </script>
 </body>
 </html>
