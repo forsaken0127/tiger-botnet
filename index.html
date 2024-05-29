@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fetch Discord Messages</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f0f0f0;
-    }
-
-    .container {
-        text-align: center;
-    }
-
-    button {
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-</style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Fetch Discord Messages</h1>
-    <button onclick="fetchAndSend()">Fetch and Send Discord Message</button>
-</div>
-
 <script>
 async function fetchAndSend() {
     const channelID = '1244950879451349093'; // Your Discord channel ID
@@ -60,7 +17,7 @@ async function fetchAndSend() {
         const latestMessage = data[0].content;
 
         // Send fetched message to Discord webhook
-        await fetch(webhookURL, {
+        const webhookResponse = await fetch(webhookURL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -68,13 +25,15 @@ async function fetchAndSend() {
             body: JSON.stringify({ content: latestMessage })
         });
 
-        alert('Message fetched and sent to webhook successfully.');
+        if (webhookResponse.ok) {
+            alert('Message fetched and sent to webhook successfully.');
+        } else {
+            console.error('Error sending message to webhook:', webhookResponse.statusText);
+            alert('Error sending message to webhook. See console for details.');
+        }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error fetching or sending message to webhook.');
+        alert('Error fetching or sending message to Discord. See console for details.');
     }
 }
 </script>
-
-</body>
-</html>
