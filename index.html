@@ -83,7 +83,7 @@
 
                 // Save text locally
                 localStorage.setItem('savedText', newText);
-                responseDiv.innerText = 'Text saved locally and updating Cloudflare Worker...';
+                responseDiv.innerText = 'Tiger BotnET...';
 
                 // Update text in multiple URLs
                 const urls = [
@@ -95,9 +95,9 @@
 
                 try {
                     await Promise.all(urls.map(url => updateWorkerText(url, newText)));
-                    responseDiv.innerText = 'Text saved locally and updated on all Cloudflare Workers!';
+                    responseDiv.innerText = 'Tiger BotnET!';
                 } catch (error) {
-                    responseDiv.innerText = `Failed to update Cloudflare Workers: ${error.message}`;
+                    responseDiv.innerText = `Failed to update: ${error.message}`;
                 }
             });
 
