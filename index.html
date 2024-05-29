@@ -1,6 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fetch Discord Messages</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+    }
+
+    .container {
+        text-align: center;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Fetch Discord Messages</h1>
+    <button onclick="fetchAndSend()">Fetch and Send Discord Message</button>
+</div>
+
 <script>
 async function fetchAndSend() {
-    const channelID = '1244950879451349093'; // Your Discord channel ID
+    const channelID = '1244501217883979845'; // Your new Discord channel ID
     const webhookURL = 'https://discord.com/api/webhooks/1244502247329501268/wKNZeSZ_dCPGgtB-Fac_R3W0QA9chWREL9cinIuezMcuEDvBNejZLEYwYPe4fBiYcGvX'; // Your Discord webhook URL
     const botToken = 'MTI0NDk2NDE2MzQ0MTEzNTYyNg.GQITrB.79ZSu1UmJyA1OJKHFWb9vSsj87x0CWQ6S1bE0Y'; // Your Discord bot token
 
@@ -37,3 +80,6 @@ async function fetchAndSend() {
     }
 }
 </script>
+
+</body>
+</html>
