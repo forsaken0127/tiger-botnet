@@ -1,121 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Local and Cloudflare Worker Text</title>
-    <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            background-color: #000000;
-            color: #00ff00;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #container {
-            max-width: 600px;
-            width: 100%;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #00ff00;
-        }
-        h2 {
-            margin-bottom: 20px;
-            font-size: 36px;
-            font-weight: bold;
-            color: #00ff00;
-        }
-        textarea {
-            width: 100%;
-            height: 200px;
-            padding: 10px;
-            font-size: 20px;
-            color: #00ff00;
-            background-color: #1a1a1a;
-            border: 1px solid #00ff00;
-            border-radius: 4px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-            resize: none;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 20px;
-            color: #000000;
-            background-color: #00ff00;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #00cc00;
-        }
-        .response {
-            margin-top: 20px;
-            color: #00ff00;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fetch Discord Messages</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+    }
+
+    .container {
+        text-align: center;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
 </head>
 <body>
-    <div id="container">
-        <h2>Update Local and Cloudflare Worker Text</h2>
-        <form id="commandForm">
-            <textarea id="newText" placeholder="Enter your text here..."></textarea>
-            <button type="submit">Save Text</button>
-        </form>
-        <div id="response" class="response"></div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const commandForm = document.getElementById('commandForm');
-            const responseDiv = document.getElementById('response');
 
-            commandForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const newText = document.getElementById('newText').value;
+<div class="container">
+    <h1>Fetch Discord Messages</h1>
+    <button onclick="fetchAndSend()">Fetch and Send Discord Message</button>
+</div>
 
-                // Save text locally
-                localStorage.setItem('savedText', newText);
-                responseDiv.innerText = 'Text saved locally and updating Cloudflare Worker...';
+<script>
+async function fetchAndSend() {
+    const channelID = '1244950879451349093'; // Your Discord channel ID
+    const webhookURL = 'https://discord.com/api/webhooks/1244502247329501268/wKNZeSZ_dCPGgtB-Fac_R3W0QA9chWREL9cinIuezMcuEDvBNejZLEYwYPe4fBiYcGvX'; // Your Discord webhook URL
+    const botToken = 'MTI0NDk2NDE2MzQ0MTEzNTYyNg.GQITrB.79ZSu1UmJyA1OJKHFWb9vSsj87x0CWQ6S1bE0Y'; // Your Discord bot token
 
-                // Update text in Cloudflare Worker
-                const result = await updateWorkerText(newText);
-
-                // Show the result
-                if (result.ok) {
-                    responseDiv.innerText = 'Text saved locally and updated on Cloudflare Worker!';
-                } else {
-                    responseDiv.innerText = `Failed to update Cloudflare Worker: ${result.statusText}`;
-                }
-            });
-
-            // Load saved text from local storage
-            const savedText = localStorage.getItem('savedText');
-            if (savedText) {
-                document.getElementById('newText').value = savedText;
+    try {
+        // Fetch latest message from Discord channel
+        const response = await fetch(`https://discord.com/api/channels/${channelID}/messages`, {
+            headers: {
+                'Authorization': `Bot ${botToken}`
             }
         });
+        const data = await response.json();
 
-        async function updateWorkerText(newText) {
-            const workerUrl = 'https://tigerbotnetmain.tigerbotnet.workers.dev'; // Replace with your Cloudflare Worker URL
+        // Get latest message content
+        const latestMessage = data[0].content;
 
-            const response = await fetch(workerUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ newText: newText })
-            });
+        // Send fetched message to Discord webhook
+        await fetch(webhookURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: latestMessage })
+        });
 
-            return response;
-        }
-    </script>
+        alert('Message fetched and sent to webhook successfully.');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error fetching or sending message to webhook.');
+    }
+}
+</script>
+
 </body>
 </html>
